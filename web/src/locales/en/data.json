@@ -1520,6 +1520,7 @@
     "Access secret": "Access secret",
     "Access secret - Tooltip": "The access secret corresponding to the access key",
     "Edit Key": "Edit Key",
+    "Inactive": "Inactive",
     "New Key": "New Key"
   }
 }

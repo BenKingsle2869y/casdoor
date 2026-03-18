@@ -245,7 +245,7 @@ class KeyEditPage extends React.Component {
               this.updateKeyField("state", value);
             })}>
               <Option value="Active">{i18next.t("subscription:Active")}</Option>
-              <Option value="Inactive">{i18next.t("subscription:Suspended")}</Option>
+              <Option value="Inactive">{i18next.t("key:Inactive")}</Option>
             </Select>
           </Col>
         </Row>
