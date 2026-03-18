@@ -99,6 +99,7 @@ func main() {
 	web.InsertFilter("*", web.BeforeRouter, routers.RecordMessage)
 	web.InsertFilter("*", web.BeforeRouter, routers.FieldValidationFilter)
 	web.InsertFilter("*", web.AfterExec, routers.AfterRecordMessage, web.WithReturnOnOutput(false))
+	web.InsertFilter("*", web.AfterExec, routers.SecureCookieFilter, web.WithReturnOnOutput(false))
 
 	var logAdapter string
 	logConfigMap := make(map[string]interface{})
