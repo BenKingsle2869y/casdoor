@@ -250,9 +250,27 @@ func SetUserOAuthProperties(organization *Organization, user *User, providerType
 
 	if userInfo.AvatarUrl != "" {
 		propertyName := fmt.Sprintf("oauth_%s_avatarUrl", providerType)
+		oldAvatarUrl := getUserProperty(user, propertyName)
 		setUserProperty(user, propertyName, userInfo.AvatarUrl)
-		if user.Avatar == "" || user.Avatar == organization.DefaultAvatar {
+		if user.Avatar == "" || user.Avatar == organization.DefaultAvatar || user.Avatar == oldAvatarUrl {
 			user.Avatar = userInfo.AvatarUrl
+		}
+
+		// Re-upload to permanent storage when OAuth avatar URL changes or permanent avatar is not set.
+		// This prevents display issues when the temporary OAuth avatar URL (e.g. WeChat) expires.
+		if oldAvatarUrl != userInfo.AvatarUrl || user.PermanentAvatar == "" {
+			permanentAvatarUrl, err := getPermanentAvatarUrl(user.Owner, user.Name, userInfo.AvatarUrl, true)
+			if err != nil {
+				return false, err
+			}
+			if permanentAvatarUrl != "" {
+				user.PermanentAvatar = permanentAvatarUrl
+				// Update user.Avatar to the permanent CDN URL if it is currently
+				// using the (possibly temporary) OAuth avatar URL.
+				if user.Avatar == userInfo.AvatarUrl {
+					user.Avatar = permanentAvatarUrl
+				}
+			}
 		}
 	}
 
