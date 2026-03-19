@@ -29,6 +29,7 @@ import (
 const (
 	providerHintRedirectScriptName = "ProviderHintRedirect.js"
 	authCallbackHandlerScriptName  = "AuthCallbackHandler.js"
+	casdoorModalScriptName         = "CasdoorModal.js"
 )
 
 func getLightweightAuthScriptPath(scriptName string) string {
@@ -93,6 +94,10 @@ func serveProviderHintRedirectScript(ctx *context.Context) bool {
 
 func serveAuthCallbackHandlerScript(ctx *context.Context) bool {
 	return serveLightweightAuthScript(ctx, "/"+authCallbackHandlerScriptName, authCallbackHandlerScriptName)
+}
+
+func serveCasdoorModalScript(ctx *context.Context) bool {
+	return serveLightweightAuthScript(ctx, "/"+casdoorModalScriptName, casdoorModalScriptName)
 }
 
 func serveProviderHintRedirectPage(ctx *context.Context) bool {

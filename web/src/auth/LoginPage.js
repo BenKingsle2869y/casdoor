@@ -129,7 +129,7 @@ class LoginPage extends React.Component {
           this.login(values);
         }
 
-        if (params.get("popup") === "1") {
+        if (params.get("popup") === "1" || params.get("popup") === "2") {
           window.addEventListener("beforeunload", () => {
             this.sendPopupData({type: "windowClosed"}, params.get("redirect_uri"));
           });
@@ -345,8 +345,11 @@ class LoginPage extends React.Component {
 
   sendPopupData(message, redirectUri) {
     const params = new URLSearchParams(this.props.location.search);
-    if (params.get("popup") === "1") {
+    const popup = params.get("popup");
+    if (popup === "1") {
       window.opener.postMessage(message, redirectUri);
+    } else if (popup === "2") {
+      window.parent.postMessage(message, redirectUri || "*");
     }
   }
 
@@ -405,7 +408,10 @@ class LoginPage extends React.Component {
           }, 1000);
         }
       } else {
-        Setting.goToLink(redirectUrl);
+        const popup = new URLSearchParams(this.props.location.search).get("popup");
+        if (popup !== "2") {
+          Setting.goToLink(redirectUrl);
+        }
         this.sendPopupData({type: "loginSuccess", data: {code: code, state: oAuthParams.state}}, oAuthParams.redirectUri);
       }
     }
