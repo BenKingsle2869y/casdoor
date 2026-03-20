@@ -159,6 +159,7 @@
       codeChallenge: getRefinedValue(innerParams.get("code_challenge")),
       responseMode: getRefinedValue(innerParams.get("response_mode")),
       relayState: getRefinedValue(lowercaseQueries["relaystate"]),
+      resource: getRefinedValue(innerParams.get("resource")),
       type: "code"
     };
   }
@@ -176,7 +177,8 @@
       "&state=" + oAuthParams.state +
       "&nonce=" + oAuthParams.nonce +
       "&code_challenge_method=" + oAuthParams.challengeMethod +
-      "&code_challenge=" + oAuthParams.codeChallenge;
+      "&code_challenge=" + oAuthParams.codeChallenge +
+      "&resource=" + encodeURIComponent(oAuthParams.resource || "");
   }
 
   function createFormAndSubmit(action, params) {
