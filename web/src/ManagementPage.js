@@ -108,6 +108,8 @@ import * as Cookie from "cookie";
 import * as UserBackend from "./backend/UserBackend";
 import SiteListPage from "./SiteListPage";
 import SiteEditPage from "./SiteEditPage";
+import ServerListPage from "./ServerListPage";
+import ServerEditPage from "./ServerEditPage";
 import RuleEditPage from "./RuleEditPage";
 import RuleListPage from "./RuleListPage";
 
@@ -349,6 +351,7 @@ function ManagementPage(props) {
     })));
 
     res.push(Setting.getItem(<Link style={{color: textColor}} to="/sites">{i18next.t("general:Gateway")}</Link>, "/gateway", <CheckCircleTwoTone twoToneColor={twoToneColor} />, [
+      Setting.getItem(<Link to="/servers">{i18next.t("general:MCP Servers")}</Link>, "/servers"),
       Setting.getItem(<Link to="/sites">{i18next.t("general:Sites")}</Link>, "/sites"),
       Setting.getItem(<Link to="/certs">{i18next.t("general:Certs")}</Link>, "/certs"),
       Setting.getItem(<Link to="/rules">{i18next.t("general:Rules")}</Link>, "/rules"),
@@ -356,8 +359,7 @@ function ManagementPage(props) {
 
     res.push(Setting.getItem(<Link style={{color: textColor}} to="/sessions">{i18next.t("general:Logging & Auditing")}</Link>, "/logs", <WalletTwoTone twoToneColor={twoToneColor} />, [
       Setting.getItem(<Link to="/sessions">{i18next.t("general:Sessions")}</Link>, "/sessions"),
-      Conf.CasvisorUrl ? Setting.getItem(<a target="_blank" rel="noreferrer" href={Conf.CasvisorUrl}>{i18next.t("general:Records")}</a>, "/records")
-        : Setting.getItem(<Link to="/records">{i18next.t("general:Records")}</Link>, "/records"),
+      Setting.getItem(<Link to="/records">{i18next.t("general:Records")}</Link>, "/records"),
       Setting.getItem(<Link to="/tokens">{i18next.t("general:Tokens")}</Link>, "/tokens"),
       Setting.getItem(<Link to="/verifications">{i18next.t("general:Verifications")}</Link>, "/verifications"),
     ]));
@@ -490,6 +492,8 @@ function ManagementPage(props) {
         <Route exact path="/certs/:organizationName/:certName" render={(props) => renderLoginIfNotLoggedIn(<CertEditPage account={account} {...props} />)} />
         <Route exact path="/keys" render={(props) => renderLoginIfNotLoggedIn(<KeyListPage account={account} {...props} />)} />
         <Route exact path="/keys/:organizationName/:keyName" render={(props) => renderLoginIfNotLoggedIn(<KeyEditPage account={account} {...props} />)} />
+        <Route exact path="/servers" render={(props) => renderLoginIfNotLoggedIn(<ServerListPage account={account} {...props} />)} />
+        <Route exact path="/servers/:organizationName/:serverName" render={(props) => renderLoginIfNotLoggedIn(<ServerEditPage account={account} {...props} />)} />
         <Route exact path="/sites" render={(props) => renderLoginIfNotLoggedIn(<SiteListPage account={account} {...props} />)} />
         <Route exact path="/sites/:organizationName/:siteName" render={(props) => renderLoginIfNotLoggedIn(<SiteEditPage account={account} {...props} />)} />
         <Route exact path="/rules" render={(props) => renderLoginIfNotLoggedIn(<RuleListPage account={account} {...props} />)} />

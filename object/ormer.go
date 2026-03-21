@@ -23,8 +23,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/casvisor/casvisor-go-sdk/casvisorsdk"
-
 	"github.com/beego/beego/v2/server/web"
 	"github.com/casdoor/casdoor/conf"
 	"github.com/casdoor/casdoor/util"
@@ -420,7 +418,7 @@ func (a *Ormer) createTable() {
 		panic(err)
 	}
 
-	err = a.Engine.Sync2(new(casvisorsdk.Record))
+	err = a.Engine.Sync2(new(Record))
 	if err != nil {
 		panic(err)
 	}
@@ -466,6 +464,11 @@ func (a *Ormer) createTable() {
 	}
 
 	err = a.Engine.Sync2(new(Rule))
+	if err != nil {
+		panic(err)
+	}
+
+	err = a.Engine.Sync2(new(Server))
 	if err != nil {
 		panic(err)
 	}
