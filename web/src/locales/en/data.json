@@ -329,8 +329,6 @@
     "Enabled": "Enabled",
     "Enabled successfully": "Enabled successfully",
     "Enforcers": "Enforcers",
-    "Expire time": "Expire time",
-    "Expire time - Tooltip": "Expiration time for this key",
     "Failed to add": "Failed to add",
     "Failed to cancel": "Failed to cancel",
     "Failed to connect to server": "Failed to connect to server",
@@ -1513,14 +1511,5 @@
     "Single org only": "Single org only",
     "Single org only - Tooltip": "Triggered only in the organization that the webhook belongs to",
     "Value": "Value"
-  },
-  "key": {
-    "Access key": "Access key",
-    "Access key - Tooltip": "The access key ID used to identify the key",
-    "Access secret": "Access secret",
-    "Access secret - Tooltip": "The access secret corresponding to the access key",
-    "Edit Key": "Edit Key",
-    "Inactive": "Inactive",
-    "New Key": "New Key"
   }
 }
