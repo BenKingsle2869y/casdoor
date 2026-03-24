@@ -109,6 +109,21 @@ func denyMcpRequest(ctx *context.Context) {
 	_ = ctx.Output.JSON(resp, true, false)
 }
 
+func getUsernameByApiKey(ctx *context.Context) (string, error) {
+	accessKey := ctx.Input.Query("accessKey")
+	accessSecret := ctx.Input.Query("accessSecret")
+	if accessKey == "" || accessSecret == "" {
+		return "", nil
+	}
+
+	userId, err := object.ResolveSubjectByKey(accessKey, accessSecret)
+	if err != nil {
+		return "", err
+	}
+
+	return userId, nil
+}
+
 func getUsernameByClientIdSecret(ctx *context.Context) (string, error) {
 	clientId, clientSecret, ok := ctx.Request.BasicAuth()
 	if !ok {

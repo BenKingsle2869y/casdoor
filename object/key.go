@@ -15,7 +15,9 @@
 package object
 
 import (
+	"crypto/subtle"
 	"fmt"
+	"time"
 
 	"github.com/casdoor/casdoor/util"
 	"github.com/xorm-io/core"
@@ -205,4 +207,39 @@ func GetKeyByAccessKey(accessKey string) (*Key, error) {
 		return &key, nil
 	}
 	return nil, nil
+}
+
+func ResolveSubjectByKey(accessKey, accessSecret string) (string, error) {
+	key, err := GetKeyByAccessKey(accessKey)
+	if err != nil {
+		return "", err
+	}
+	if key == nil || subtle.ConstantTimeCompare([]byte(key.AccessSecret), []byte(accessSecret)) != 1 {
+		return "", fmt.Errorf("invalid key credentials")
+	}
+
+	if key.State != "Active" {
+		return "", fmt.Errorf("key is not active")
+	}
+
+	if key.ExpireTime != "" {
+		expireTimeObj, err := time.Parse(time.RFC3339, key.ExpireTime)
+		if err != nil {
+			return "", err
+		}
+		if time.Now().After(expireTimeObj) {
+			return "", fmt.Errorf("key has expired")
+		}
+	}
+
+	switch key.Type {
+	case "User":
+		return util.GetId(key.Owner, key.User), nil
+	case "Application":
+		return fmt.Sprintf("app/%s", key.Application), nil
+	case "Organization":
+		return fmt.Sprintf("org/%s", key.Organization), nil
+	default:
+		return util.GetId(key.Owner, key.Name), nil
+	}
 }
