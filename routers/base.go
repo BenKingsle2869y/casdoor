@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web/context"
 	"github.com/casdoor/casdoor/conf"
 	"github.com/casdoor/casdoor/i18n"
@@ -111,6 +112,7 @@ func denyMcpRequest(ctx *context.Context) {
 
 func getUsernameByClientIdSecret(ctx *context.Context) (string, error) {
 	clientId, clientSecret, ok := ctx.Request.BasicAuth()
+	fromBasicAuth := ok
 	if !ok {
 		clientId = ctx.Input.Query("clientId")
 		clientSecret = ctx.Input.Query("clientSecret")
@@ -125,10 +127,24 @@ func getUsernameByClientIdSecret(ctx *context.Context) (string, error) {
 		return "", err
 	}
 	if application == nil {
+		if fromBasicAuth {
+			// The Authorization: Basic header may come from an HTTP proxy or gateway
+			// protecting Casdoor at the transport level. Silently ignore credentials
+			// that don't match any Casdoor application instead of returning an error,
+			// so that proxy-protected deployments continue to work normally.
+			logs.Debug("getUsernameByClientIdSecret: Basic Auth clientId %q does not match any application; ignoring (possible HTTP proxy credentials)", clientId)
+			return "", nil
+		}
 		return "", fmt.Errorf("Application not found for client ID: %s", clientId)
 	}
 
 	if application.ClientSecret != clientSecret {
+		if fromBasicAuth {
+			// Same reasoning: proxy credentials that happen to share a clientId with a
+			// Casdoor application but have a different password should not block requests.
+			logs.Warning("getUsernameByClientIdSecret: Basic Auth clientId %q matched application %q but secret did not match; ignoring (possible HTTP proxy credentials or misconfiguration)", clientId, application.Name)
+			return "", nil
+		}
 		return "", fmt.Errorf("Incorrect client secret for application: %s", application.Name)
 	}
 
