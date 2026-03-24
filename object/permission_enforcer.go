@@ -291,26 +291,26 @@ func removeGroupingPolicies(permission *Permission) error {
 	return nil
 }
 
-func Enforce(permission *Permission, request []string, permissionIds ...string) (bool, error) {
+func Enforce(permission *Permission, request []interface{}, permissionIds ...string) (bool, error) {
 	enforcer, err := getPermissionEnforcer(permission, permissionIds...)
 	if err != nil {
 		return false, err
 	}
 
-	// type transformation
-	interfaceRequest := util.StringToInterfaceArray(request)
+	// convert any JSON-encoded string elements to anonymous structs for ABAC support
+	interfaceRequest := util.ConvertInterfaceArray(request)
 
 	return enforcer.Enforce(interfaceRequest...)
 }
 
-func BatchEnforce(permission *Permission, requests [][]string, permissionIds ...string) ([]bool, error) {
+func BatchEnforce(permission *Permission, requests [][]interface{}, permissionIds ...string) ([]bool, error) {
 	enforcer, err := getPermissionEnforcer(permission, permissionIds...)
 	if err != nil {
 		return nil, err
 	}
 
-	// type transformation
-	interfaceRequests := util.StringToInterfaceArray2d(requests)
+	// convert any JSON-encoded string elements to anonymous structs for ABAC support
+	interfaceRequests := util.ConvertInterfaceArray2d(requests)
 
 	return enforcer.BatchEnforce(interfaceRequests)
 }

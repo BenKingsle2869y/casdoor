@@ -395,6 +395,31 @@ func StringToInterfaceArray2d(arrays [][]string) [][]interface{} {
 	return interfaceArrays
 }
 
+func ConvertInterfaceArray(array []interface{}) []interface{} {
+	result := make([]interface{}, len(array))
+	for i, elem := range array {
+		if s, ok := elem.(string); ok {
+			jStruct, err := TryJsonToAnonymousStruct(s)
+			if err == nil {
+				result[i] = jStruct
+			} else {
+				result[i] = elem
+			}
+		} else {
+			result[i] = elem
+		}
+	}
+	return result
+}
+
+func ConvertInterfaceArray2d(arrays [][]interface{}) [][]interface{} {
+	result := make([][]interface{}, len(arrays))
+	for i, arr := range arrays {
+		result[i] = ConvertInterfaceArray(arr)
+	}
+	return result
+}
+
 func generateRandomString(length int) (string, error) {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, length)

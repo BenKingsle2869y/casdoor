@@ -26,7 +26,7 @@ import (
 // @Title Enforce
 // @Tag Enforcer API
 // @Description Call Casbin Enforce API
-// @Param   body    body   []string  true   "Casbin request"
+// @Param   body    body   []interface{}  true   "Casbin request (array of strings or JSON objects for ABAC)"
 // @Param   permissionId    query   string  false   "permission id"
 // @Param   modelId    query   string  false   "model id"
 // @Param   resourceId    query   string  false   "resource id"
@@ -57,7 +57,7 @@ func (c *ApiController) Enforce() {
 		return
 	}
 
-	var request []string
+	var request []interface{}
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &request)
 	if err != nil {
 		c.ResponseError(err.Error())
@@ -74,8 +74,8 @@ func (c *ApiController) Enforce() {
 		res := []bool{}
 		keyRes := []string{}
 
-		// type transformation
-		interfaceRequest := util.StringToInterfaceArray(request)
+		// convert any JSON-encoded string elements to anonymous structs for ABAC support
+		interfaceRequest := util.ConvertInterfaceArray(request)
 
 		enforceResult, err := enforcer.Enforce(interfaceRequest...)
 		if err != nil {
@@ -173,7 +173,7 @@ func (c *ApiController) Enforce() {
 // @Title BatchEnforce
 // @Tag Enforcer API
 // @Description Call Casbin BatchEnforce API
-// @Param   body    body   []string  true   "array of casbin requests"
+// @Param   body    body   [][]interface{}  true   "array of Casbin requests (each request is an array of strings or JSON objects for ABAC)"
 // @Param   permissionId    query   string  false   "permission id"
 // @Param   modelId    query   string  false   "model id"
 // @Param   owner    query   string  false   "owner"
@@ -197,7 +197,7 @@ func (c *ApiController) BatchEnforce() {
 		return
 	}
 
-	var requests [][]string
+	var requests [][]interface{}
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &requests)
 	if err != nil {
 		c.ResponseError(err.Error())
@@ -214,8 +214,8 @@ func (c *ApiController) BatchEnforce() {
 		res := [][]bool{}
 		keyRes := []string{}
 
-		// type transformation
-		interfaceRequests := util.StringToInterfaceArray2d(requests)
+		// convert any JSON-encoded string elements to anonymous structs for ABAC support
+		interfaceRequests := util.ConvertInterfaceArray2d(requests)
 
 		enforceResult, err := enforcer.BatchEnforce(interfaceRequests)
 		if err != nil {
