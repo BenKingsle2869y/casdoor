@@ -587,6 +587,17 @@ func CheckLoginPermission(userId string, application *Application) (bool, error)
 		return true, nil
 	}
 
+	// For shared applications, allow users from organizations that have this app as their default application
+	if application.IsShared && owner != application.Organization {
+		userOrg, err := getOrganization("admin", owner)
+		if err != nil {
+			return false, err
+		}
+		if userOrg != nil && userOrg.DefaultApplication == application.Name {
+			return true, nil
+		}
+	}
+
 	permissions, err := GetPermissions(application.Organization)
 	if err != nil {
 		return false, err

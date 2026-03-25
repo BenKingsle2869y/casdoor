@@ -103,6 +103,47 @@ func GetUserByFields(organization string, field string) (*User, error) {
 	return nil, nil
 }
 
+// GetUserOrganizationForSharedApp resolves the actual organization of a user when logging in via a shared application.
+// If the user is not found in the specified organization and the application is shared,
+// it searches in all organizations that have this app as their default application.
+// Returns the resolved organization name.
+func GetUserOrganizationForSharedApp(application *Application, organization string, username string) (string, error) {
+	if application == nil || !application.IsShared {
+		return organization, nil
+	}
+
+	// Check if user exists in the specified organization first
+	user, err := GetUserByFields(organization, username)
+	if err != nil {
+		return organization, err
+	}
+	if user != nil {
+		return organization, nil
+	}
+
+	// User not found in the default org, search in organizations that have this shared app as their default
+	organizations := []*Organization{}
+	err = ormer.Engine.Where("default_application=?", application.Name).Find(&organizations)
+	if err != nil {
+		return organization, err
+	}
+
+	for _, org := range organizations {
+		if org.Name == organization {
+			continue // Already checked
+		}
+		user, err = GetUserByFields(org.Name, username)
+		if err != nil {
+			return organization, err
+		}
+		if user != nil {
+			return org.Name, nil
+		}
+	}
+
+	return organization, nil
+}
+
 func SetUserField(user *User, field string, value string) (bool, error) {
 	bean := make(map[string]interface{})
 	if field == "password" {
