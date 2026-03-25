@@ -1,7 +1,6 @@
 linters:
   disable-all: true
   enable:
-    - deadcode
     - dupl
     - errcheck
     - goconst
@@ -17,14 +16,11 @@ linters:
     - nakedret
     - prealloc
     - staticcheck
-    - structcheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - revive
-    - exportloopref
 run:
   deadline: 5m
   skip-dirs:
