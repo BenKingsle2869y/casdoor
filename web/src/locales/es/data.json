@@ -1165,7 +1165,10 @@
     "Wallets": "Billeteras",
     "Wallets - Tooltip": "Billeteras - Información adicional",
     "Web": "Web",
-    "admin (Shared)": "administrador (compartido)"
+    "admin (Shared)": "administrador (compartido)",
+    "Tag": "Tag",
+    "Tag - Tooltip": "The syslog tag (program name) to identify log messages",
+    "Leave empty to use local syslog": "Leave empty to use local syslog"
   },
   "record": {
     "Is triggered": "Fue activado",

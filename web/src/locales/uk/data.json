@@ -1165,7 +1165,10 @@
     "Wallets": "Гаманці",
     "Wallets - Tooltip": "Гаманці – підказка",
     "Web": "Web",
-    "admin (Shared)": "адміністратор (спільно)"
+    "admin (Shared)": "адміністратор (спільно)",
+    "Tag": "Tag",
+    "Tag - Tooltip": "The syslog tag (program name) to identify log messages",
+    "Leave empty to use local syslog": "Leave empty to use local syslog"
   },
   "record": {
     "Is triggered": "Спрацьовує",

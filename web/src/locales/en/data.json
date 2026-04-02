@@ -1165,7 +1165,10 @@
     "Wallets": "Wallets",
     "Wallets - Tooltip": "Supported digital wallets",
     "Web": "Web",
-    "admin (Shared)": "admin (Shared)"
+    "admin (Shared)": "admin (Shared)",
+    "Tag": "Tag",
+    "Tag - Tooltip": "The syslog tag (program name) to identify log messages",
+    "Leave empty to use local syslog": "Leave empty to use local syslog"
   },
   "record": {
     "Is triggered": "Is triggered",

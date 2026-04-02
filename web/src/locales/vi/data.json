@@ -1165,7 +1165,10 @@
     "Wallets": "Ví",
     "Wallets - Tooltip": "Gợi ý ví",
     "Web": "Web",
-    "admin (Shared)": "quản trị viên (Chung)"
+    "admin (Shared)": "quản trị viên (Chung)",
+    "Tag": "Tag",
+    "Tag - Tooltip": "The syslog tag (program name) to identify log messages",
+    "Leave empty to use local syslog": "Leave empty to use local syslog"
   },
   "record": {
     "Is triggered": "Đã kích hoạt",

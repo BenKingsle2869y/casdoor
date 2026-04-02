@@ -32,6 +32,7 @@ import {renderWeb3ProviderFields} from "./provider/Web3ProviderFields";
 import {renderStorageProviderFields} from "./provider/StorageProviderFields";
 import {renderFaceIdProviderFields} from "./provider/FaceIDProviderFields";
 import {renderIDVerificationProviderFields} from "./provider/IDVerificationProviderFields";
+import {renderLogProviderFields} from "./provider/LogProviderFields";
 
 const {Option} = Select;
 const {TextArea} = Input;
@@ -715,6 +716,8 @@ class ProviderEditPage extends React.Component {
               } else if (value === "ID Verification") {
                 this.updateProviderField("type", "Jumio");
                 this.updateProviderField("endpoint", "");
+              } else if (value === "Log") {
+                this.updateProviderField("type", "Linux Syslog");
               }
             })}>
               {
@@ -722,6 +725,7 @@ class ProviderEditPage extends React.Component {
                   {id: "Captcha", name: "Captcha"},
                   {id: "Email", name: "Email"},
                   {id: "ID Verification", name: "ID Verification"},
+                  {id: "Log", name: "Log"},
                   {id: "MFA", name: "MFA"},
                   {id: "Notification", name: "Notification"},
                   {id: "OAuth", name: "OAuth"},
@@ -851,6 +855,7 @@ class ProviderEditPage extends React.Component {
           (this.state.provider.category === "Captcha" && this.state.provider.type === "Default") ||
           (this.state.provider.category === "Web3") ||
           (this.state.provider.category === "MFA") ||
+          (this.state.provider.category === "Log") ||
           (this.state.provider.category === "Storage" && this.state.provider.type === "Local File System") ||
           (this.state.provider.category === "SMS" && this.state.provider.type === "Custom HTTP SMS") ||
           (this.state.provider.category === "Email" && this.state.provider.type === "Custom HTTP Email") ||
@@ -972,6 +977,10 @@ class ProviderEditPage extends React.Component {
           this.updateProviderField.bind(this)
         ) : null}
         {this.state.provider.category === "ID Verification" ? renderIDVerificationProviderFields(
+          this.state.provider,
+          this.updateProviderField.bind(this)
+        ) : null}
+        {this.state.provider.category === "Log" ? renderLogProviderFields(
           this.state.provider,
           this.updateProviderField.bind(this)
         ) : null}

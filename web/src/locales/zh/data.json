@@ -1165,7 +1165,10 @@
     "Wallets": "钱包",
     "Wallets - Tooltip": "支持的数字钱包",
     "Web": "Web",
-    "admin (Shared)": "admin（共享）"
+    "admin (Shared)": "admin（共享）",
+    "Tag": "Tag",
+    "Tag - Tooltip": "The syslog tag (program name) to identify log messages",
+    "Leave empty to use local syslog": "Leave empty to use local syslog"
   },
   "record": {
     "Is triggered": "是否触发",

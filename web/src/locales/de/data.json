@@ -1165,7 +1165,10 @@
     "Wallets": "Brieftaschen",
     "Wallets - Tooltip": "Unterstützte digitale Brieftaschen",
     "Web": "Web",
-    "admin (Shared)": "admin (Gemeinsam)"
+    "admin (Shared)": "admin (Gemeinsam)",
+    "Tag": "Tag",
+    "Tag - Tooltip": "The syslog tag (program name) to identify log messages",
+    "Leave empty to use local syslog": "Leave empty to use local syslog"
   },
   "record": {
     "Is triggered": "Wurde ausgelöst",

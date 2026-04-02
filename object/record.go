@@ -160,6 +160,11 @@ func AddRecord(record *Record) bool {
 		fmt.Println(errWebhook)
 	}
 
+	errLog := AddRecordToLogProviders(record)
+	if errLog != nil {
+		fmt.Println(errLog)
+	}
+
 	affected, err := addRecord(record)
 	if err != nil {
 		panic(err)

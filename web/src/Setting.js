@@ -1419,6 +1419,10 @@ export function getProviderTypeOptions(category) {
       {id: "Jumio", name: "Jumio"},
       {id: "Alibaba Cloud", name: "Alibaba Cloud"},
     ]);
+  } else if (category === "Log") {
+    return ([
+      {id: "Linux Syslog", name: "Linux Syslog"},
+    ]);
   } else {
     return [];
   }

@@ -1165,7 +1165,10 @@
     "Wallets": "ウォレット",
     "Wallets - Tooltip": "ウォレット - ツールチップ",
     "Web": "ウェブ",
-    "admin (Shared)": "管理者（共有）"
+    "admin (Shared)": "管理者（共有）",
+    "Tag": "Tag",
+    "Tag - Tooltip": "The syslog tag (program name) to identify log messages",
+    "Leave empty to use local syslog": "Leave empty to use local syslog"
   },
   "record": {
     "Is triggered": "トリガーされました",
