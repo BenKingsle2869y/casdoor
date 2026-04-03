@@ -36,6 +36,7 @@ class SiteEditPage extends React.Component {
       siteName: props.match.params.siteName,
       rules: [],
       providers: [],
+      aiProviders: [],
       site: null,
       certs: null,
       applications: null,
@@ -50,6 +51,7 @@ class SiteEditPage extends React.Component {
     this.getRules();
     this.getApplications();
     this.getAlertProviders();
+    this.getAiProviders();
   }
 
   getOrganizations() {
@@ -135,6 +137,20 @@ class SiteEditPage extends React.Component {
       });
   }
 
+  getAiProviders() {
+    ProviderBackend.getProviders()
+      .then((res) => {
+        if (res.status === "ok") {
+          const data = res.data.filter(provider => provider.category === "AI");
+          this.setState({
+            aiProviders: data,
+          });
+        } else {
+          Setting.showMessage("error", `Failed to get providers: ${res.msg}`);
+        }
+      });
+  }
+
   parseSiteField(key, value) {
     if (["score"].includes(key)) {
       value = Setting.myParseInt(value);
@@ -205,6 +221,37 @@ class SiteEditPage extends React.Component {
             }} />
           </Col>
         </Row>
+        <Row style={{marginTop: "20px"}} >
+          <Col style={{marginTop: "5px"}} span={2}>
+            {i18next.t("site:Type")}:
+          </Col>
+          <Col span={22} >
+            <Select virtual={false} style={{width: "100%"}} value={this.state.site.type} onChange={(value => {this.updateSiteField("type", value);})}>
+              {
+                [
+                  {id: "HTTP", name: "HTTP"},
+                  {id: "AI", name: "AI"},
+                ].map((item, index) => <Option key={index} value={item.id}>{item.name}</Option>)
+              }
+            </Select>
+          </Col>
+        </Row>
+        {
+          this.state.site.type === "AI" && (
+            <Row style={{marginTop: "20px"}} >
+              <Col style={{marginTop: "5px"}} span={2}>
+                {i18next.t("site:AI provider")}:
+              </Col>
+              <Col span={22} >
+                <Select virtual={false} style={{width: "100%"}} showSearch value={this.state.site.aiProvider} onChange={(value => {this.updateSiteField("aiProvider", value);})}>
+                  {
+                    this.state.aiProviders.map((provider, index) => <Option key={index} value={provider.name}>{provider.displayName || provider.name}</Option>)
+                  }
+                </Select>
+              </Col>
+            </Row>
+          )
+        }
         <Row style={{marginTop: "20px"}} >
           <Col style={{marginTop: "5px"}} span={2}>
             {i18next.t("site:Domain")}:

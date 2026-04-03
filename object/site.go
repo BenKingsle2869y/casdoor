@@ -41,6 +41,7 @@ type Site struct {
 	UpdatedTime string `xorm:"varchar(100)" json:"updatedTime"`
 	DisplayName string `xorm:"varchar(100)" json:"displayName"`
 
+	Type           string      `xorm:"varchar(100)" json:"type"`
 	Tag            string      `xorm:"varchar(100)" json:"tag"`
 	Domain         string      `xorm:"varchar(100)" json:"domain"`
 	OtherDomains   []string    `xorm:"varchar(500)" json:"otherDomains"`
@@ -62,6 +63,9 @@ type Site struct {
 	IsSelf         bool        `json:"isSelf"`
 	Status         string      `xorm:"varchar(100)" json:"status"`
 	Nodes          []*NodeItem `xorm:"mediumtext" json:"nodes"`
+
+	AiProvider     string    `xorm:"varchar(100)" json:"aiProvider"`
+	AiProviderObj  *Provider `xorm:"-" json:"aiProviderObj"`
 
 	CasdoorApplication string       `xorm:"varchar(100)" json:"casdoorApplication"`
 	ApplicationObj     *Application `xorm:"-" json:"applicationObj"`

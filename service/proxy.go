@@ -31,7 +31,7 @@ import (
 	"github.com/casdoor/casdoor/util"
 )
 
-func forwardHandler(targetUrl string, writer http.ResponseWriter, request *http.Request) {
+func forwardHandler(targetUrl string, writer http.ResponseWriter, request *http.Request, aiApiKey ...string) {
 	target, err := url.Parse(targetUrl)
 
 	if nil != err {
@@ -52,6 +52,12 @@ func forwardHandler(targetUrl string, writer http.ResponseWriter, request *http.
 				// r.Header.Set("X-Forwarded-For", clientIP)
 				r.Header.Set("X-Real-Ip", clientIP)
 			}
+		}
+
+		if len(aiApiKey) > 0 && aiApiKey[0] != "" {
+			// Sanitize the API key to prevent header injection (remove newlines/carriage returns)
+			key := strings.NewReplacer("\r", "", "\n", "").Replace(aiApiKey[0])
+			r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", key))
 		}
 	}
 
@@ -299,7 +305,11 @@ func nextHandle(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, path)
 	} else {
 		targetUrl := joinPath(site.GetHost(), r.RequestURI)
-		forwardHandler(targetUrl, w, r)
+		if site.Type == "AI" && site.AiProviderObj != nil {
+			forwardHandler(targetUrl, w, r, site.AiProviderObj.ClientSecret)
+		} else {
+			forwardHandler(targetUrl, w, r)
+		}
 	}
 }
 

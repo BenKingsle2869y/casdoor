@@ -71,10 +71,30 @@ func getCasdoorApplicationMap() (map[string]*Application, error) {
 	return res, nil
 }
 
+func getAiProviderMap() (map[string]*Provider, error) {
+	providers, err := GetGlobalProviders()
+	if err != nil {
+		return nil, fmt.Errorf("GetGlobalProviders() error: %s", err.Error())
+	}
+
+	res := map[string]*Provider{}
+	for _, provider := range providers {
+		if provider.Category == "AI" {
+			res[provider.Name] = provider
+		}
+	}
+	return res, nil
+}
+
 func refreshSiteMap() error {
 	applicationMap, err := getCasdoorApplicationMap()
 	if err != nil {
 		fmt.Println(err)
+	}
+
+	aiProviderMap, err := getAiProviderMap()
+	if err != nil {
+		fmt.Printf("Failed to get AI provider map: %v\n", err)
 	}
 
 	newSiteMap := map[string]*Site{}
@@ -94,6 +114,14 @@ func refreshSiteMap() error {
 			if site.CasdoorApplication != "" && site.ApplicationObj == nil {
 				if v, ok2 := applicationMap[site.CasdoorApplication]; ok2 {
 					site.ApplicationObj = v
+				}
+			}
+		}
+
+		if aiProviderMap != nil {
+			if site.AiProvider != "" && site.AiProviderObj == nil {
+				if v, ok2 := aiProviderMap[site.AiProvider]; ok2 {
+					site.AiProviderObj = v
 				}
 			}
 		}

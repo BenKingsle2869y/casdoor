@@ -45,6 +45,7 @@ class SiteListPage extends BaseListPage {
       name: `site_${randomName}`,
       createdTime: moment().format(),
       displayName: `New Site - ${randomName}`,
+      type: "HTTP",
       domain: "door.casdoor.com",
       otherDomains: [],
       needRedirect: false,
@@ -64,6 +65,7 @@ class SiteListPage extends BaseListPage {
       node: "",
       isSelf: false,
       nodes: [],
+      aiProvider: "",
       casdoorApplication: "",
       organizations: [],
     };
