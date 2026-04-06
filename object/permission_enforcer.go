@@ -52,16 +52,23 @@ func getPermissionEnforcer(p *Permission, permissionIDs ...string) (*casbin.Enfo
 	}
 
 	policyFilter := xormadapter.Filter{
-		V5: policyFilterV5,
-	}
-
-	if !HasRoleDefinition(enforcer.GetModel()) {
-		policyFilter.Ptype = []string{"p"}
+		Ptype: []string{"p"},
+		V5:    policyFilterV5,
 	}
 
 	err = enforcer.LoadFilteredPolicy(policyFilter)
 	if err != nil {
 		return nil, err
+	}
+
+	if HasRoleDefinition(enforcer.GetModel()) {
+		gPolicyFilter := xormadapter.Filter{
+			Ptype: []string{"g"},
+		}
+		err = enforcer.LoadIncrementalFilteredPolicy(gPolicyFilter)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return enforcer, nil
@@ -184,7 +191,6 @@ func getGroupingPolicies(permission *Permission) ([][]string, error) {
 	var groupingPolicies [][]string
 
 	domainExist := len(permission.Domains) > 0
-	permissionId := permission.GetId()
 
 	for _, roleId := range permission.Roles {
 		visited := map[string]struct{}{}
@@ -203,20 +209,20 @@ func getGroupingPolicies(permission *Permission) ([][]string, error) {
 			for _, subUser := range role.Users {
 				if domainExist {
 					for _, domain := range permission.Domains {
-						groupingPolicies = append(groupingPolicies, []string{subUser, roleId, domain, "", "", permissionId})
+						groupingPolicies = append(groupingPolicies, []string{subUser, roleId, domain})
 					}
 				} else {
-					groupingPolicies = append(groupingPolicies, []string{subUser, roleId, "", "", "", permissionId})
+					groupingPolicies = append(groupingPolicies, []string{subUser, roleId})
 				}
 			}
 
 			for _, subRole := range role.Roles {
 				if domainExist {
 					for _, domain := range permission.Domains {
-						groupingPolicies = append(groupingPolicies, []string{subRole, roleId, domain, "", "", permissionId})
+						groupingPolicies = append(groupingPolicies, []string{subRole, roleId, domain})
 					}
 				} else {
-					groupingPolicies = append(groupingPolicies, []string{subRole, roleId, "", "", "", permissionId})
+					groupingPolicies = append(groupingPolicies, []string{subRole, roleId})
 				}
 			}
 		}
@@ -276,15 +282,42 @@ func removeGroupingPolicies(permission *Permission) error {
 		return err
 	}
 
-	groupingPolicies, err := getGroupingPolicies(permission)
-	if err != nil {
-		return err
-	}
+	domainExist := len(permission.Domains) > 0
 
-	if len(groupingPolicies) > 0 {
-		_, err = enforcer.RemoveGroupingPolicies(groupingPolicies)
+	for _, roleId := range permission.Roles {
+		visited := map[string]struct{}{}
+
+		if roleId == "*" {
+			roleId = util.GetId(permission.Owner, "*")
+		}
+
+		rolesInRole, err := getRolesInRole(roleId, visited)
 		if err != nil {
 			return err
+		}
+
+		for _, role := range rolesInRole {
+			curRoleId := role.GetId()
+			subjects := append(role.Users, role.Roles...)
+			for _, subject := range subjects {
+				if domainExist {
+					for _, domain := range permission.Domains {
+						// Remove policies matching subject, role, and domain regardless of v3..v5
+						// (handles both old format with permissionId in v5 and new format without it)
+						_, err = enforcer.RemoveFilteredGroupingPolicy(0, subject, curRoleId, domain)
+						if err != nil {
+							return err
+						}
+					}
+				} else {
+					// Remove policies matching subject and role where v2 is empty
+					// (handles both old no-domain format with permissionId in v5 and new format)
+					_, err = enforcer.RemoveFilteredGroupingPolicy(0, subject, curRoleId, "")
+					if err != nil {
+						return err
+					}
+				}
+			}
 		}
 	}
 

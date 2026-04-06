@@ -171,11 +171,6 @@ func UpdatePermission(id string, permission *Permission) (bool, error) {
 	}
 
 	if affected != 0 {
-		err = removeGroupingPolicies(oldPermission)
-		if err != nil {
-			return false, err
-		}
-
 		err = removePolicies(oldPermission)
 		if err != nil {
 			return false, err
@@ -302,11 +297,6 @@ func DeletePermission(permission *Permission) (bool, error) {
 	}
 
 	if affected {
-		err = removeGroupingPolicies(permission)
-		if err != nil {
-			return false, err
-		}
-
 		err = removePolicies(permission)
 		if err != nil {
 			return false, err
