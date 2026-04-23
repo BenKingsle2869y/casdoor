@@ -1,4 +1,4 @@
-// Copyright 2021 The Casdoor Authors. All Rights Reserved.
+// Copyright 2024 The Casdoor Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,132 +15,41 @@
 package main
 
 import (
-	"encoding/json"
+	"flag"
 	"fmt"
+	"os"
 
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
-	_ "github.com/beego/beego/v2/server/web/session/redis"
-	"github.com/casdoor/casdoor/authz"
-	"github.com/casdoor/casdoor/conf"
-	"github.com/casdoor/casdoor/controllers"
-	"github.com/casdoor/casdoor/ldap"
-	"github.com/casdoor/casdoor/object"
-	"github.com/casdoor/casdoor/proxy"
-	"github.com/casdoor/casdoor/radius"
-	"github.com/casdoor/casdoor/routers"
-	"github.com/casdoor/casdoor/service"
-	"github.com/casdoor/casdoor/util"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/plugins/cors"
+	_ "github.com/casdoor/casdoor/routers"
 )
 
 func main() {
-	web.BConfig.WebConfig.Session.SessionOn = true
-	web.BConfig.WebConfig.Session.SessionName = "casdoor_session_id"
-	if conf.GetConfigString("redisEndpoint") == "" {
-		web.BConfig.WebConfig.Session.SessionProvider = "file"
-		web.BConfig.WebConfig.Session.SessionProviderConfig = "./tmp"
-	} else {
-		web.BConfig.WebConfig.Session.SessionProvider = "redis"
-		web.BConfig.WebConfig.Session.SessionProviderConfig = conf.GetConfigString("redisEndpoint")
-	}
-	web.BConfig.WebConfig.Session.SessionCookieLifeTime = 3600 * 24 * 30
-	web.BConfig.WebConfig.Session.SessionGCMaxLifetime = 3600 * 24 * 30
-	// web.BConfig.WebConfig.Session.SessionCookieSameSite = http.SameSiteNoneMode
+	createDatabase := flag.Bool("createDatabase", false, "true if you need casdoor to create the database")
+	flag.Parse()
 
-	routers.InitAPI()
-	object.InitFlag()
-	object.InitAdapter()
-	object.CreateTables()
-
+	object.InitAdapter(*createDatabase)
 	object.InitDb()
-
-	// Handle export command
-	if object.ShouldExportData() {
-		exportPath := object.GetExportFilePath()
-		err := object.DumpToFile(exportPath)
-		if err != nil {
-			panic(fmt.Sprintf("Error exporting data to %s: %v", exportPath, err))
-		}
-		fmt.Printf("Data exported successfully to %s\n", exportPath)
-		return
-	}
-
 	object.InitDefaultStorageProvider()
-	object.InitLogProviders()
 	object.InitLdapAutoSynchronizer()
 	proxy.InitHttpClient()
-	authz.InitApi()
-	object.InitUserManager()
-	object.InitFromFile()
-	object.InitCleanupTokens()
-	object.InitCleanupDeviceAuthMap()
+	auth.InitVault()
 
-	object.InitSiteMap()
-	if len(object.SiteMap) != 0 {
-		object.InitRuleMap()
-		object.StartMonitorSitesLoop()
+	if beego.BConfig.RunMode == "dev" {
+		beego.BConfig.WebConfig.DirectoryIndex = true
+		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
 
-	util.SafeGoroutine(func() { object.RunSyncUsersJob() })
-	util.SafeGoroutine(func() { controllers.InitCLIDownloader() })
+	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
-	// web.DelStaticPath("/static")
-	// web.SetStaticPath("/static", "web/build/static")
+	port := beego.AppConfig.DefaultInt("httpport", 8000)
+	fmt.Fprintf(os.Stdout, "Casdoor server started on port %d\n", port)
 
-	web.BConfig.WebConfig.DirectoryIndex = true
-	web.SetStaticPath("/swagger", "swagger")
-	web.SetStaticPath("/files", "files")
-	// https://studygolang.com/articles/2303
-	web.InsertFilter("*", web.BeforeStatic, routers.RequestBodyFilter)
-	web.InsertFilter("*", web.BeforeRouter, routers.StaticFilter)
-	web.InsertFilter("*", web.BeforeRouter, routers.AutoSigninFilter)
-	web.InsertFilter("*", web.BeforeRouter, routers.CorsFilter)
-	web.InsertFilter("*", web.BeforeRouter, routers.TimeoutFilter)
-	web.InsertFilter("*", web.BeforeRouter, routers.ApiFilter)
-	web.InsertFilter("*", web.BeforeRouter, routers.PrometheusFilter)
-	web.InsertFilter("*", web.BeforeRouter, routers.RecordMessage)
-	web.InsertFilter("*", web.BeforeRouter, routers.FieldValidationFilter)
-	web.InsertFilter("*", web.AfterExec, routers.AfterRecordMessage, web.WithReturnOnOutput(false))
-
-	var logAdapter string
-	logConfigMap := make(map[string]interface{})
-	err := json.Unmarshal([]byte(conf.GetConfigString("logConfig")), &logConfigMap)
-	if err != nil {
-		panic(err)
-	}
-	_, ok := logConfigMap["adapter"]
-	if !ok {
-		logAdapter = "file"
-	} else {
-		logAdapter = logConfigMap["adapter"].(string)
-	}
-	if logAdapter == "console" {
-		logs.Reset()
-	}
-	err = logs.SetLogger(logAdapter, conf.GetConfigString("logConfig"))
-	if err != nil {
-		panic(err)
-	}
-
-	port := web.AppConfig.DefaultInt("httpport", 8000)
-	// logs.SetLevel(logs.LevelInformational)
-	logs.SetLogFuncCall(false)
-
-	err = util.StopOldInstance(port)
-	if err != nil {
-		panic(err)
-	}
-
-	go ldap.StartLdapServer()
-	go radius.StartRadiusServer()
-	go object.ClearThroughputPerSecond()
-
-	// Start webhook delivery worker
-	object.StartWebhookDeliveryWorker()
-
-	if len(object.SiteMap) != 0 {
-		service.Start()
-	}
-
-	web.Run(fmt.Sprintf(":%v", port))
+	beego.Run()
 }
