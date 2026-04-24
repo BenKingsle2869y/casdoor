@@ -40,6 +40,7 @@ func main() {
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
 
+	// Allow all origins for local development; restrict this in production
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
@@ -48,8 +49,9 @@ func main() {
 		AllowCredentials: true,
 	}))
 
+	// Default port is 8000; override via httpport in app.conf
 	port := beego.AppConfig.DefaultInt("httpport", 8000)
-	fmt.Fprintf(os.Stdout, "Casdoor server started on port %d\n", port)
+	fmt.Fprintf(os.Stdout, "Casdoor server started on port %d (mode: %s)\n", port, beego.BConfig.RunMode)
 
 	beego.Run()
 }
