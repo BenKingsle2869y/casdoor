@@ -41,12 +41,13 @@ func main() {
 	}
 
 	// Allow all origins for local development; restrict this in production
+	// Note: In production, replace "*" with your actual frontend origin (e.g., "https://yourdomain.com")
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
+		AllowCredentials: false, // must be false when AllowOrigins is "*"
 	}))
 
 	// Default port is 8000; override via httpport in app.conf
