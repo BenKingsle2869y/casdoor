@@ -18,6 +18,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/plugins/cors"
@@ -53,7 +54,9 @@ func main() {
 	// Default port changed to 7000 for local dev to avoid conflicts with other services on 8000
 	// Falling back to 8000 (upstream default) if httpport is not set in app.conf
 	port := beego.AppConfig.DefaultInt("httpport", 8000)
-	fmt.Fprintf(os.Stdout, "Casdoor server started on port %d (mode: %s)\n", port, beego.BConfig.RunMode)
+
+	startTime := time.Now().Format("2006-01-02 15:04:05")
+	fmt.Fprintf(os.Stdout, "Casdoor server started on port %d (mode: %s) at %s\n", port, beego.BConfig.RunMode, startTime)
 
 	// Log the process ID so it's easy to identify and kill the server during local development
 	fmt.Fprintf(os.Stdout, "PID: %d\n", os.Getpid())
