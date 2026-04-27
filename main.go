@@ -55,5 +55,8 @@ func main() {
 	port := beego.AppConfig.DefaultInt("httpport", 8000)
 	fmt.Fprintf(os.Stdout, "Casdoor server started on port %d (mode: %s)\n", port, beego.BConfig.RunMode)
 
+	// Log the process ID so it's easy to identify and kill the server during local development
+	fmt.Fprintf(os.Stdout, "PID: %d\n", os.Getpid())
+
 	beego.Run()
 }
