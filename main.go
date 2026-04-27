@@ -51,7 +51,8 @@ func main() {
 	}))
 
 	// Default port changed to 7000 for local dev to avoid conflicts with other services on 8000
-	port := beego.AppConfig.DefaultInt("httpport", 7000)
+	// Falling back to 8000 (upstream default) if httpport is not set in app.conf
+	port := beego.AppConfig.DefaultInt("httpport", 8000)
 	fmt.Fprintf(os.Stdout, "Casdoor server started on port %d (mode: %s)\n", port, beego.BConfig.RunMode)
 
 	beego.Run()
