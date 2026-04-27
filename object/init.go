@@ -50,8 +50,9 @@ func InitAdapter() {
 	dbPassword := conf.GetConfigString("dbPassword")
 	dbName := conf.GetConfigString("dbName")
 
+	// Default to postgres instead of mysql for my local dev environment
 	if dbDriver == "" {
-		dbDriver = "mysql"
+		dbDriver = "postgres"
 	}
 
 	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/", dbUser, dbPassword, dbHost, dbPort)
@@ -94,7 +95,4 @@ func GetAdapter() *xormadapter.Adapter {
 	return adapter
 }
 
-// GetOrmer returns the global xorm engine instance.
-func GetOrmer() *xorm.Engine {
-	return ormer
-}
+// GetOrmer returns the global xorm engine insta
